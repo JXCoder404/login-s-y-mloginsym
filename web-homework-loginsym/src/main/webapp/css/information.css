@@ -1,0 +1,37 @@
+*{
+    
+    background: lightsteelblue;
+    
+}
+
+td{
+    font-family: '微软雅黑';
+    font-weight: bold;
+}
+
+th{
+    font-size: 21px;
+}
+
+#file::file-selector-button{
+    padding: 6px 10px;
+    background-color: #1E9FFF;
+    border: 1px solid #1E9FFF;
+    border-radius: 3px;
+    cursor: pointer;
+    color: #fff;
+    font-size: 12px;
+}
+
+a{
+    text-decoration:none;
+    font-style: italic;
+
+}
+
+a:link{
+    color:black ;
+}
+a:visited{
+    color:black;
+}

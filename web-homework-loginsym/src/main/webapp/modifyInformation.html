@@ -1,0 +1,232 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=<device-width>, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>简历模板</title>
+    <base target="_blank">
+    <link rel="stylesheet" href="css/information.css">
+</head>
+
+<body background="">
+    <table border="1" align="center" cellspacing="0" cellpadding="10" width="1000" height="200">
+        <tr>
+            <th colspan="7" >
+                我的个人简介
+            </th>
+        </tr>
+        <tr>
+            <th>姓名:</th>
+            <td><input type="text" size="10px" id="name"></td>
+            <th>年龄:</th>
+            <td><input type="text" size="10px" id="age"></td>
+            <th>民族:</th>
+            <td><input type="text" size="10px" id="nation"></td>
+            <td rowspan="3">
+                <input type="file" id="file" accept="image/*"><br><br>
+                <input type="button" id="upImage" value="上传图片">
+            </td>
+        </tr>
+        <tr>
+            <th>出生日期:</th>
+            <td><input type="date" size="10px" id="birthday"></td>
+            <th>政治面貌:</th>
+            <td><input type="text" size="10px" id="outlook"></td>
+            <th>学历:</th>
+            <td><input type="text" size="10px" id="education"></td>
+        </tr>
+        <tr>
+            <th>专业:</th>
+            <td><input type="text" size="10px" id="speciality"></td>
+            <th>毕业学校:</th>
+            <td><input type="text" size="10px" id="graduation"></td>
+            <th>邮编:</th>
+            <td><input type="text" size="10px" id="postCode"></td>
+
+        </tr>
+        
+        <tr>
+            <th>个人特长:</th>
+            <td colspan="6">
+                <textarea rows="10" cols="80" id="talent"></textarea>
+                <input type="button"  id="modify" value="提交">
+            </td>
+        </tr>
+        
+        
+        
+    </table>
+
+<script>
+
+    document.getElementById("upImage").onclick = function () {
+        let formData = new FormData();
+        let myFile = document.getElementById('file');
+        formData.append('myFile',myFile.files[0]);
+        console.log(myFile.files[0]);
+        alert("图片上传成功！");
+        const request = new XMLHttpRequest();
+
+        request.open("POST","http://localhost:80/web-homeword-loginsym/UpdateImageServlet");
+        request.send(formData);
+
+
+
+
+    }
+    document.getElementById("modify").onclick = function () {
+        var formData={
+            name: '',
+            age: '',
+            nation: '',
+            birthday: '',
+            outlook: '',
+            education: '',
+            speciality: '',
+            graduation: '',
+            postCode: '',
+            talent: '',
+            url_image: ''
+        }
+
+        formData.name=document.getElementById("name").value
+        formData.age=document.getElementById("age").value
+        formData.nation=document.getElementById("nation").value
+        formData.birthday=document.getElementById("birthday").value
+        formData.outlook=document.getElementById("outlook").value
+        formData.education=document.getElementById("education").value
+        formData.speciality=document.getElementById("speciality").value
+        formData.graduation=document.getElementById("graduation").value
+        formData.postCode=document.getElementById("postCode").value
+        formData.talent=document.getElementById("talent").value
+        ajax(
+            {
+                type: 'post',
+                url:'http://localhost:80/web-homeword-loginsym/UpdateServlet',
+                data: formData,
+                header: {
+                    'Content-Type': 'application/json'
+                },
+                success: function (){
+                    location.href="http://localhost:80/web-homeword-loginsym/information.html"
+                }
+            }
+        )
+    }
+
+    window.onload = function () {
+
+        ajax({
+            url: 'http://localhost:80/web-homeword-loginsym/InformationServlet',
+            success: function (Inf,response){
+                console.log(Inf);
+                document.getElementById("name").value = Inf.name;
+                document.getElementById("age").value = Inf.age;
+                document.getElementById("nation").value = Inf.nation;
+                document.getElementById("birthday").value = Inf.birthday;
+                document.getElementById("outlook").value = Inf.outlook;
+                document.getElementById("education").value = Inf.education;
+                document.getElementById("speciality").value = Inf.speciality;
+                document.getElementById("graduation").value = Inf.graduation;
+                document.getElementById("postCode").value = Inf.postCode;
+                document.getElementById("talent").value = Inf.talent;
+            },
+
+
+
+        })
+    }
+    function ajax(options) {
+
+        var defaults = {
+            type: 'get',
+            url: '',
+            data: {},
+            header: {
+                'Content-Type': 'application/x-www-form-urlencoded'
+            },
+            success: function() {
+
+            },
+            error: function() {}
+        }
+
+        // Object.assign() 对象覆盖函数
+        // 使用options 对象中的属性覆盖defaults 对象中的属性
+        Object.assign(defaults, options)
+
+        // 创建 ajax 对象
+        var xhr = new XMLHttpRequest()
+
+        // 拼接请求参数的变量
+        var params = ''
+
+        // 循环用户传递进来的对象格式参数
+        for (var attr in defaults.data) {
+            // 将参数 转换为 字符串格式
+            params += attr + '=' + defaults.data[attr] + '&'
+        }
+
+        // 将参数最后面的'&'截取掉
+        // 将截取的结果重新赋值给params 变量
+        params = params.substr(0, params.length - 1)
+
+        // 如果请求方式 为 GET ，直接在url后面拼接参数
+        if (defaults.type == 'get') {
+            defaults.url = defaults.url + '?' + params
+        }
+
+        // 配置 ajax 对象
+        xhr.open(defaults.type, defaults.url)
+
+        // 如果是 POST,就在send()方法里面传递 请求参数,且需要 设置 xhr.setRequestHeader
+        // 如果是 GET ，send()就传递空
+        if (defaults.type == 'post') {
+            // 用户希望向服务器端传递的请求参数的类型
+            var contentType = defaults.header['Content-Type']
+
+            // 设置 请求参数格式的类型
+            xhr.setRequestHeader('Content-Type', contentType)
+
+            // 判断用户希望的 请求参数格式类型
+            // 如果类型为 json
+
+            if (contentType == 'application/json') {
+                // 如果请求参数格式类型是  application/json
+                xhr.send(JSON.stringify(defaults.data))
+            } else {
+                // 如果请求参数格式类型是  application/x-www-form-urlencoded
+                // 向服务器端传递普通类型的请求参数
+                xhr.send(params)
+            }
+        } else {
+            xhr.send()
+        }
+
+        // 监听xhr 对象下面的 onload 事件
+        xhr.onload = function() {
+            // xhr.getResponseHeader() 获取响应头中的数据
+            var contentType = xhr.getResponseHeader('Content-Type')
+
+            // 服务器端返回的数据
+            var responseText = xhr.responseText
+
+            // 如果相应类型中 包含 application/json
+            if (contentType!=null&&contentType.includes('application/json')) {
+                // 将 json 字符串转化为 json 对象
+                responseText = JSON.parse(responseText)
+            }
+
+            if (xhr.status == 200) {
+                defaults.success(responseText, xhr)
+            } else {
+                defaults.error(responseText, xhr)
+            }
+        }
+    }
+</script>
+</body>
+
+</html>

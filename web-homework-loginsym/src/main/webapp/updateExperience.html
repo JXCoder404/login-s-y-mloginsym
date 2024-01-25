@@ -1,0 +1,217 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+    <link rel="stylesheet" href="css/experience.css">
+</head>
+<body>
+
+<table width="600px" align="center">
+    <caption><h3>实习经历信息</h3></caption>
+
+    <tr>
+        <td>
+            <label for="companyName">公司名字</label>
+            <input type="text" id="companyName">
+
+        </td>
+
+        <td>
+            <label for="employment">实习岗位</label>
+            <input type="text" id="employment">
+        </td>
+
+
+    </tr>
+
+    <tr>
+        <td>
+            <label for="statement">大概说明</label>
+            <input type="text" id="statement" >
+        </td>
+    </tr>
+
+    <tr>
+        <td>
+            <label for="beginTime">开始时间</label>
+            <input type="date" id="beginTime" >
+        </td>
+
+        <td>
+            <label for="endTime">结束时间</label>
+            <input type="date" id="endTime">
+        </td>
+    </tr>
+
+
+
+    <tr>
+        <td align="center"><input type="button" value="返回" id="back">
+        <td align="center"><input type="button" value="提交" id="submit"></td>
+
+    </tr>
+
+
+</table>
+
+<script>
+    document.getElementById("back").onclick = function () {
+        location.href="http://localhost:80/web-homeword-loginsym/information.html"
+    }
+
+
+
+    window.onload = function () {
+        var id=window.location.search.substring(4);
+        console.log(id)
+        ajax({
+            url: 'http://localhost:80/web-homeword-loginsym/SelectOneExperienceById',
+            data: {
+                id: id,
+            },
+            success: function (experience,response) {
+                console.log(experience)
+                document.getElementById("companyName").value = experience.companyName;
+                document.getElementById("employment").value = experience.employment;
+                document.getElementById("statement").value = experience.statement;
+                document.getElementById("beginTime").value = experience.beginTime;
+                document.getElementById("endTime").value = experience.endTime;
+            }
+        })
+    }
+    
+    document.getElementById("submit").onclick = function () {
+        var id=window.location.search.substring(4);
+        var formData={
+            id:'',
+            companyName : '',
+            employment : '',
+            statement : '',
+            beginTime : '',
+            endTime : ''
+
+        }
+        formData.id = id;
+        formData.companyName=document.getElementById("companyName").value
+        formData.employment=document.getElementById("employment").value
+        formData.statement=document.getElementById("statement").value
+        formData.beginTime=document.getElementById("beginTime").value
+        formData.endTime=document.getElementById("endTime").value
+
+        ajax({
+            type: 'post',
+            url: 'http://localhost:80/web-homeword-loginsym/UpdateExperienceServlet',
+            data: formData,
+            header: {
+                'Content-Type': 'application/json'
+            },
+            success: function () {
+                alert("修改成功")
+                location.href="http://localhost:80/web-homeword-loginsym/information.html"
+            }
+        })
+    }
+
+    function ajax(options) {
+
+        var defaults = {
+            type: 'get',
+            url: '',
+            data: {},
+            header: {
+                'Content-Type': 'application/x-www-form-urlencoded'
+            },
+            success: function () {
+
+            },
+            error: function () {
+            }
+        }
+
+        // Object.assign() 对象覆盖函数
+        // 使用options 对象中的属性覆盖defaults 对象中的属性
+        Object.assign(defaults, options)
+
+        // 创建 ajax 对象
+        var xhr = new XMLHttpRequest()
+
+        // 拼接请求参数的变量
+        var params = ''
+
+        // 循环用户传递进来的对象格式参数
+        for (var attr in defaults.data) {
+            // 将参数 转换为 字符串格式
+            params += attr + '=' + defaults.data[attr] + '&'
+        }
+
+        // 将参数最后面的'&'截取掉
+        // 将截取的结果重新赋值给params 变量
+        params = params.substr(0, params.length - 1)
+
+        // 如果请求方式 为 GET ，直接在url后面拼接参数
+        if (defaults.type == 'get') {
+            defaults.url = defaults.url + '?' + params
+        }
+
+        // 配置 ajax 对象
+        xhr.open(defaults.type, defaults.url)
+
+        // 如果是 POST,就在send()方法里面传递 请求参数,且需要 设置 xhr.setRequestHeader
+        // 如果是 GET ，send()就传递空
+        if (defaults.type == 'post') {
+            // 用户希望向服务器端传递的请求参数的类型
+            var contentType = defaults.header['Content-Type']
+
+            // 设置 请求参数格式的类型
+            xhr.setRequestHeader('Content-Type', contentType)
+
+            // 判断用户希望的 请求参数格式类型
+            // 如果类型为 json
+
+            if (contentType == 'application/json') {
+                // 如果请求参数格式类型是  application/json
+                xhr.send(JSON.stringify(defaults.data))
+            } else {
+                // 如果请求参数格式类型是  application/x-www-form-urlencoded
+                // 向服务器端传递普通类型的请求参数
+                xhr.send(params)
+            }
+        } else {
+            xhr.send()
+        }
+
+        // 监听xhr 对象下面的 onload 事件
+        xhr.onload = function () {
+            // xhr.getResponseHeader() 获取响应头中的数据
+            var contentType = xhr.getResponseHeader('Content-Type')
+
+            // 服务器端返回的数据
+            var responseText = xhr.responseText
+
+            // 如果相应类型中 包含 application/json
+            if (contentType != null && contentType.includes('application/json')) {
+                // 将 json 字符串转化为 json 对象
+                responseText = JSON.parse(responseText)
+            }
+
+            if (xhr.status == 200) {
+                defaults.success(responseText, xhr)
+            } else {
+                defaults.error(responseText, xhr)
+            }
+        }
+    }
+    function getUrlParams(url, name) {
+        var reg = new RegExp("(^|&)" + name + "=([^&]*)(&|$)")
+        const cuturl = url.substr(url.indexOf("?") + 1)
+        const matchArray = cuturl.match(reg)
+        if (matchArray) {
+            return decodeURI(matchArray[2])
+        }
+        return null;
+    }
+
+</script>
+</body>
+</html>

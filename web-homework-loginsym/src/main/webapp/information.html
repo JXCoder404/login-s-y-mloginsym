@@ -1,0 +1,236 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=<device-width>, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>简历模板</title>
+    <base target="_blank">
+    <link rel="stylesheet" href="css/information.css">
+</head>
+
+<body background="">
+<table border="1" align="center" cellspacing="0" cellpadding="10" width="800" height="70">
+    <tr>
+        <th colspan="7">
+            我的个人简介
+        </th>
+    </tr>
+    <tr>
+        <th>姓名:</th>
+        <td id="name">林越洲</td>
+        <th>年龄:</th>
+        <td id="age">20</td>
+        <th>民族:</th>
+        <td id="nation">汉</td>
+        <td rowspan="3"><img id="image" src="image/abc.png" height="125" width="75"></td>
+    </tr>
+    <tr>
+        <th>出生日期:</th>
+        <td id="birthday">19970000</td>
+        <th>政治面貌:</th>
+        <td id="outlook">团员</td>
+        <th>学历:</th>
+        <td id="education">本科</td>
+    </tr>
+    <tr>
+        <th>专业:</th>
+        <td id="speciality">网络工程</td>
+        <th>毕业学校:</th>
+        <td id="graduation">中国石油大学</td>
+        <th>邮编:</th>
+        <td id="postCode">237483</td>
+
+    </tr>
+
+    <tr>
+        <th>个人特长:</th>
+        <td colspan="6">
+            <textarea id="talent" name="talent" cols="80" rows="10" readonly></textarea>
+            <a href="http://localhost:80/web-homeword-loginsym/modifyInformation.html" target="_self">修改</a>
+        </td>
+
+    </tr>
+
+
+
+
+</table>
+<table border="1" align="center" cellspacing="0" cellpadding="10" width="800" height="70" id="experience">
+    <tr>
+        <th colspan="7">
+            实习经历
+
+        </th>
+
+
+    </tr>
+
+    <tr>
+
+        <th>公司名称</th>
+        <th>就职岗位</th>
+        <th colspan="2">大概说明</th>
+        <th>开始时间</th>
+        <th>结束时间</th>
+        <th>操作
+            <a href="http://localhost:80/web-homeword-loginsym/experience.html" target="_self">新增</a>
+        </th>
+    </tr>
+
+</table>
+<script>
+
+
+
+
+    window.onload = function () {
+
+
+        ajax({
+            url: 'http://localhost:80/web-homeword-loginsym/InformationServlet',
+            success: function (Inf, response) {
+                console.log(Inf);
+                document.getElementById("name").innerHTML = Inf.name;
+                document.getElementById("age").innerHTML = Inf.age;
+                document.getElementById("nation").innerHTML = Inf.nation;
+                document.getElementById("birthday").innerHTML = Inf.birthday;
+                document.getElementById("outlook").innerHTML = Inf.outlook;
+                document.getElementById("education").innerHTML = Inf.education;
+                document.getElementById("speciality").innerHTML = Inf.speciality;
+                document.getElementById("graduation").innerHTML = Inf.graduation;
+                document.getElementById("postCode").innerHTML = Inf.postCode;
+                document.getElementById("talent").innerHTML = Inf.talent;
+                document.getElementById("image").src = Inf.url_image
+
+            }
+        })
+
+
+        ajax({
+            url: 'http://localhost:80/web-homeword-loginsym/ExperienceServlet',
+            success: function (experiences, response) {
+                console.log(experiences);
+                for (var i = 0; i < experiences.length; i++) {
+                    var experience = experiences[i];
+                    var id = experience.id;
+                    var link = 'http://localhost:80/web-homeword-loginsym/updateExperience.html?'+'id='+id
+                    var link_delete = 'http://localhost:80/web-homeword-loginsym/DeleteExperienceById?id='+id
+                    document.getElementById("experience").innerHTML +=
+                        "<tr>" +
+                        "<td>" + experience.companyName + "</td>" +
+                        "<td>" + experience.employment + "</td>" +
+                        "<td colspan='2'>" + experience.statement + "</td>" +
+                        "<td>" + experience.beginTime + "</td>" +
+                        "<td>" + experience.endTime + "</td>" +
+                        "<td> <a target='_self' href="+link+">修改</a> <a target='_self' id='delete' href="+link_delete+">删除</a> </td>" +
+                        "</tr>"
+
+
+
+                }
+
+            }
+        })
+
+    }
+
+
+
+
+    function ajax(options) {
+
+        var defaults = {
+            type: 'get',
+            url: '',
+            data: {},
+            header: {
+                'Content-Type': 'application/x-www-form-urlencoded'
+            },
+            success: function () {
+
+            },
+            error: function () {
+            }
+        }
+
+        // Object.assign() 对象覆盖函数
+        // 使用options 对象中的属性覆盖defaults 对象中的属性
+        Object.assign(defaults, options)
+
+        // 创建 ajax 对象
+        var xhr = new XMLHttpRequest()
+
+        // 拼接请求参数的变量
+        var params = ''
+
+        // 循环用户传递进来的对象格式参数
+        for (var attr in defaults.data) {
+            // 将参数 转换为 字符串格式
+            params += attr + '=' + defaults.data[attr] + '&'
+        }
+
+        // 将参数最后面的'&'截取掉
+        // 将截取的结果重新赋值给params 变量
+        params = params.substr(0, params.length - 1)
+
+        // 如果请求方式 为 GET ，直接在url后面拼接参数
+        if (defaults.type == 'get') {
+            defaults.url = defaults.url + '?' + params
+        }
+
+        // 配置 ajax 对象
+        xhr.open(defaults.type, defaults.url)
+
+        // 如果是 POST,就在send()方法里面传递 请求参数,且需要 设置 xhr.setRequestHeader
+        // 如果是 GET ，send()就传递空
+        if (defaults.type == 'post') {
+            // 用户希望向服务器端传递的请求参数的类型
+            var contentType = defaults.header['Content-Type']
+
+            // 设置 请求参数格式的类型
+            xhr.setRequestHeader('Content-Type', contentType)
+
+            // 判断用户希望的 请求参数格式类型
+            // 如果类型为 json
+
+            if (contentType == 'application/json') {
+                // 如果请求参数格式类型是  application/json
+                xhr.send(JSON.stringify(defaults.data))
+            } else {
+                // 如果请求参数格式类型是  application/x-www-form-urlencoded
+                // 向服务器端传递普通类型的请求参数
+                xhr.send(params)
+            }
+        } else {
+            xhr.send()
+        }
+
+        // 监听xhr 对象下面的 onload 事件
+        xhr.onload = function () {
+            // xhr.getResponseHeader() 获取响应头中的数据
+            var contentType = xhr.getResponseHeader('Content-Type')
+
+            // 服务器端返回的数据
+            var responseText = xhr.responseText
+
+            // 如果相应类型中 包含 application/json
+            if (contentType != null && contentType.includes('application/json')) {
+                // 将 json 字符串转化为 json 对象
+                responseText = JSON.parse(responseText)
+            }
+
+            if (xhr.status == 200) {
+                defaults.success(responseText, xhr)
+            } else {
+                defaults.error(responseText, xhr)
+            }
+        }
+    }
+</script>
+
+
+</body>
+
+</html>

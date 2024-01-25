@@ -1,0 +1,252 @@
+<!DOCTYPE html>
+<html>
+
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+  <head>
+      <link rel="stylesheet" href="css/login.css">
+  </head>
+  <body>
+
+        <div class="header">
+<!--            用户访问次数-->
+            <label id="count"></label>
+<!--            天气信息-->
+            <span id="weather">1111111111111111111111</span>
+
+
+
+
+          <input type="checkbox" id="display">
+          <label for="display" class="display-btn-login">登录</label>
+
+          <input type="checkbox" id="display-register">
+          <label for="display-register" class="display-btn-register">注册</label>
+
+          <div id= "container-login">
+            <label for="display" class="close-btn" title="close">&times;</label>
+
+            <h1>登陆账号</h1>
+            <form id="login">
+                <label for="username">账号</label>
+                <input id="username" type="text">
+
+                <label for="password">密码</label>
+                <input id="password" type="password">
+
+              <a >忘记密码？</a>
+                <input type="button" id="login_button" value="登录" class="button">
+            </form>
+
+            
+          </div>
+
+          <div id="container-register">
+            <label for="display-register" class="close-btn" title="close">&times;</label>
+
+            <h1>注册账号</h1>
+            <form id="register">
+                <label for="username-re">账号</label>
+                <input id="username-re" type="text">
+
+                <label for="password-re">密码</label>
+                <input id="password-re" type="text">
+
+                <label for="passwordagain">确认密码</label>
+                <input id="passwordagain" type="text">
+
+                <input type="button" id="register_button" value="注册" class="button">
+
+            </form>
+
+            
+          </div>
+
+        </div>
+
+
+        <script>
+
+            window.onload = function () {
+                ajax({
+                    url: 'http://localhost:80/web-homeword-loginsym/CountServlet',
+                    success:function (count,response){
+                        document.getElementById("count").innerHTML="欢迎您，您是今天第"+count+"个用户！"
+                    }
+                })
+
+                ajax({
+                    url:'http://localhost:80/web-homeword-loginsym/WeatherServlet',
+                    success:function (weather,response) {
+                        console.log(weather);
+                        var todayData = weather.data.forecast[0];
+                        document.getElementById("weather").innerHTML=todayData.high+"&nbsp&nbsp&nbsp&nbsp&nbsp"+todayData.low+"&nbsp&nbsp&nbsp&nbsp&nbsp"+todayData.week+"&nbsp&nbsp&nbsp&nbsp&nbsp"+todayData.type
+                    }
+                })
+            }
+            
+            
+            document.getElementById("login_button").onclick = function () {
+
+
+                var formData={
+                    username: '',
+                    password: ''
+                }
+
+                formData.username=document.getElementById("username").value;
+                formData.password=document.getElementById("password").value;
+
+                console.log(formData);
+
+                ajax({
+                    type: 'get',
+                    url: 'http://localhost/web-homeword-loginsym/LoginServlet',
+                    data: formData,
+                    success: function(data,responce) {
+                        console.log('这里是success函数:');
+                        console.log(data);
+                        if (data=="success"){
+                            location.href="http://localhost/web-homeword-loginsym/information.html"
+                        }else{
+                            alert("对不起，用户名或密码错误！")
+                        }
+
+                    },
+                })
+            }
+
+            document.getElementById("register_button").onclick= function (){
+                var formData={
+                    username: '',
+                    password: ''
+                }
+
+                var username = document.getElementById("username-re").value;
+                var password = document.getElementById("password-re").value;
+                var passwordagain = document.getElementById("passwordagain").value;
+
+                if(password!=passwordagain){
+                    alert("两次密码输入不一致！请重新输入");
+                }else{
+                    formData.username=username;
+                    formData.password=password;
+
+                    ajax({
+                        type: 'post',
+                        url: 'http://localhost/web-homeword-loginsym/RegisterServlet',
+                        data:formData,
+                        header: {
+                            'Content-Type': 'application/json'
+                        },
+                        success: function (flag,response){
+                            console.log("这里是success");
+                            if(flag=="success"){
+                                alert("注册成功！")
+                                document.getElementById("display-register").checked=false;
+                                document.getElementById("display").checked=true;
+                            }
+                            else{
+                                alert("注册失败，用户名已存在！")
+                            }
+                        }
+                    })
+                }
+            }
+
+
+            function ajax(options) {
+
+                var defaults = {
+                    type: 'get',
+                    url: '',
+                    data: {},
+                    header: {
+                        'Content-Type': 'application/x-www-form-urlencoded'
+                    },
+                    success: function() {
+
+                    },
+                    error: function() {}
+                }
+
+                // Object.assign() 对象覆盖函数
+                // 使用options 对象中的属性覆盖defaults 对象中的属性
+                Object.assign(defaults, options)
+
+                // 创建 ajax 对象
+                var xhr = new XMLHttpRequest()
+
+                // 拼接请求参数的变量
+                var params = ''
+
+                // 循环用户传递进来的对象格式参数
+                for (var attr in defaults.data) {
+                    // 将参数 转换为 字符串格式
+                    params += attr + '=' + defaults.data[attr] + '&'
+                }
+
+                // 将参数最后面的'&'截取掉
+                // 将截取的结果重新赋值给params 变量
+                params = params.substr(0, params.length - 1)
+
+                // 如果请求方式 为 GET ，直接在url后面拼接参数
+                if (defaults.type == 'get') {
+                    defaults.url = defaults.url + '?' + params
+                }
+
+                // 配置 ajax 对象
+                xhr.open(defaults.type, defaults.url)
+
+                // 如果是 POST,就在send()方法里面传递 请求参数,且需要 设置 xhr.setRequestHeader
+                // 如果是 GET ，send()就传递空
+                if (defaults.type == 'post') {
+                    // 用户希望向服务器端传递的请求参数的类型
+                    var contentType = defaults.header['Content-Type']
+
+                    // 设置 请求参数格式的类型
+                    xhr.setRequestHeader('Content-Type', contentType)
+
+                    // 判断用户希望的 请求参数格式类型
+                    // 如果类型为 json
+
+                    if (contentType == 'application/json') {
+                        // 如果请求参数格式类型是  application/json
+                        xhr.send(JSON.stringify(defaults.data))
+                    } else {
+                        // 如果请求参数格式类型是  application/x-www-form-urlencoded
+                        // 向服务器端传递普通类型的请求参数
+                        xhr.send(params)
+                    }
+                } else {
+                    xhr.send()
+                }
+
+                // 监听xhr 对象下面的 onload 事件
+                xhr.onload = function() {
+                    // xhr.getResponseHeader() 获取响应头中的数据
+                    var contentType = xhr.getResponseHeader('Content-Type')
+
+                    // 服务器端返回的数据
+                    var responseText = xhr.responseText
+
+                    // 如果相应类型中 包含 application/json
+                    if (contentType!=null&&contentType.includes('application/json')) {
+                        // 将 json 字符串转化为 json 对象
+                        responseText = JSON.parse(responseText)
+                    }
+
+                    if (xhr.status == 200) {
+                        defaults.success(responseText, xhr)
+                    } else {
+                        defaults.error(responseText, xhr)
+                    }
+                }
+            }
+
+        </script>
+
+
+  </body>
+
+
+</html>
