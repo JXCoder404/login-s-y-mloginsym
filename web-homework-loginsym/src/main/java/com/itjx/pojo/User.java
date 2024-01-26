@@ -2,7 +2,8 @@ package com.itjx.pojo;
 
 public class User {
 
-    private String sex;
+
+    private Integer sex;
     private Integer id;
     private String username;
     private String password;
